@@ -5,18 +5,14 @@
 echo "📰 准备部署到 Netlify..."
 echo ""
 
-# 检查是否已登录 Netlify
-if ! npx netlify status 2>/dev/null; then
-    echo "🔐 请先登录 Netlify..."
-    npx netlify login
+# 检查是否已链接到项目
+if [ ! -f ".netlify/state.json" ]; then
+    echo "🔗 首次部署，创建新站点..."
+    npx netlify deploy --create-site --prod --dir=public --functions=netlify/functions
+else
+    echo "📦 更新现有站点..."
+    npx netlify deploy --prod --dir=public --functions=netlify/functions
 fi
-
-echo ""
-echo "📦 正在部署..."
-echo ""
-
-# 使用 npx 运行 netlify deploy
-npx netlify deploy --prod --dir=public --functions=netlify/functions
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -24,8 +20,11 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "🌐 你的站点已上线！"
     echo "📝 请查看上面的 URL 访问你的网站"
+    echo ""
+    echo "💡 提示: 下次更新只需运行此脚本即可"
 else
     echo ""
     echo "❌ 部署失败，请检查错误信息"
     exit 1
 fi
+
