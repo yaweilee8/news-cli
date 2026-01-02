@@ -754,9 +754,13 @@
       refreshBtn.disabled = true;
 
       try {
-        const endpoint = currentSource === 'baidu' ? '/.netlify/functions/baidu-hot' :
-                          currentSource === 'zhihu' ? '/.netlify/functions/zhihu-hot' :
-                          '/.netlify/functions/hacker-hot';
+        // 检测环境：本地使用 /api/，生产环境使用 /.netlify/functions/
+        const isNetlify = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        const apiPrefix = isNetlify ? '/.netlify/functions' : '/api';
+
+        const endpoint = currentSource === 'baidu' ? `${apiPrefix}/baidu-hot` :
+                          currentSource === 'zhihu' ? `${apiPrefix}/zhihu-hot` :
+                          `${apiPrefix}/hacker-hot`;
         const response = await fetch(endpoint);
         const result = await response.json();
 
