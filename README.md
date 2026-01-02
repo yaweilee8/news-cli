@@ -272,3 +272,8 @@ Netlify Functions (Serverless API)
 ## 许可证
 
 MIT
+
+## ✅ GitHub + Netlify 自动部署测试
+
+测试时间: 2026-01-02 14:32:22
+
