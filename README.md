@@ -113,6 +113,42 @@ npx netlify deploy --prod --dir=public --functions=netlify/functions
    - 将整个项目文件夹拖入上传区域
    - 设置发布目录为 `public`
 
+#### GitHub 自动部署 ⭐（推荐）
+
+配置 GitHub + Netlify 自动部署，每次推送代码自动更新网站：
+
+**3步完成设置：**
+
+1. **创建 GitHub 仓库**
+   ```bash
+   # 访问 https://github.com/new 创建仓库 "news-cli"
+   ```
+
+2. **推送代码**
+   ```bash
+   git push -u origin main
+   ```
+
+3. **在 Netlify 关联 GitHub**
+   - 访问: https://app.netlify.com/projects/charming-dolphin-4ef2cb/settings/deploys
+   - 点击 "Connect to GitHub"
+   - 选择 `news-cli` 仓库
+
+✅ 完成！现在每次推送代码都会自动部署。
+
+**日常使用：**
+```bash
+# 修改代码后，一键提交并自动部署
+./push.sh
+
+# 或手动提交
+git add .
+git commit -m "feat: 添加新功能"
+git push  # Netlify 自动部署 🚀
+```
+
+📖 **详细指南**: 查看 [QUICKSTART.md](QUICKSTART.md) 或 [GITHUB_SETUP.md](GITHUB_SETUP.md)
+
 #### 详细部署指南
 
 查看 [NETLIFY_DEPLOY.md](NETLIFY_DEPLOY.md) 获取完整的部署说明，包括：
