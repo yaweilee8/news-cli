@@ -1,0 +1,31 @@
+{
+  "name": "news-cli",
+  "version": "1.0.0",
+  "description": "中国热门新闻命令行工具",
+  "main": "index.js",
+  "bin": {
+    "news": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "web": "node server.js",
+    "test": "node index.js"
+  },
+  "keywords": [
+    "news",
+    "hot",
+    "baidu",
+    "weibo",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "chalk": "^4.1.2",
+    "cheerio": "^1.1.2",
+    "date-fns": "^4.1.0",
+    "express": "^5.2.1"
+  }
+}
