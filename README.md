@@ -117,7 +117,21 @@ npx netlify deploy --prod --dir=public --functions=netlify/functions
 
 配置 GitHub + Netlify 自动部署，每次推送代码自动更新网站：
 
-**3步完成设置：**
+**一键自动配置（推荐）：**
+
+```bash
+# 运行自动化配置脚本
+./quick-setup.sh
+```
+
+脚本会自动：
+- 🌐 打开浏览器创建 GitHub 仓库
+- 📤 推送代码到 GitHub
+- 🔗 打开 Netlify 配置页面
+- 🧪 测试自动部署
+- ✅ 完成所有配置！
+
+**手动配置（3步）：**
 
 1. **创建 GitHub 仓库**
    ```bash
