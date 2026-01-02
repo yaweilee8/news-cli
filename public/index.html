@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>中国热门新闻 - 实时热搜榜</title>
+  <title>全球热点新闻 - 实时追踪</title>
   <style>
     * {
       margin: 0;
@@ -11,112 +11,272 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.8);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--primary-gradient);
+      background-attachment: fixed;
       min-height: 100vh;
       padding: 20px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* 动态背景 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: backgroundMove 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes backgroundMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
 
     .header {
       text-align: center;
-      color: white;
-      margin-bottom: 30px;
+      color: var(--text-primary);
+      margin-bottom: 40px;
+      padding: 40px 20px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-md);
+      animation: fadeInDown 0.8s ease;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 30px rgba(255, 255, 255, 0.3);
+      letter-spacing: -1px;
     }
 
     .header p {
-      font-size: 1.1rem;
-      opacity: 0.9;
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      font-weight: 300;
+    }
+
+    .header-info {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .header-stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    .header-stat-icon {
+      font-size: 1.3rem;
     }
 
     .refresh-btn {
-      background: white;
-      color: #667eea;
+      background: var(--secondary-gradient);
+      color: white;
       border: none;
-      padding: 10px 25px;
-      border-radius: 25px;
+      padding: 14px 35px;
+      border-radius: 50px;
       font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      margin-top: 15px;
-      transition: all 0.3s;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .refresh-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .refresh-btn:hover::before {
+      width: 300px;
+      height: 300px;
     }
 
     .refresh-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(240, 147, 251, 0.4);
     }
 
     .refresh-btn:active {
-      transform: translateY(0);
+      transform: translateY(-1px) scale(1.02);
     }
 
     .refresh-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
+    }
+
+    .refresh-btn-icon {
+      display: inline-block;
+      margin-right: 8px;
+      transition: transform 0.6s;
+    }
+
+    .refresh-btn:hover .refresh-btn-icon {
+      transform: rotate(180deg);
     }
 
     .tabs {
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 15px;
+      margin-bottom: 30px;
       justify-content: center;
+      flex-wrap: wrap;
     }
 
     .tab {
-      padding: 12px 30px;
-      background: rgba(255,255,255,0.2);
-      border: 2px solid rgba(255,255,255,0.3);
-      color: white;
-      border-radius: 25px;
+      padding: 16px 35px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--glass-border);
+      color: var(--text-primary);
+      border-radius: 50px;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       font-size: 1rem;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s;
+    }
+
+    .tab:hover::before {
+      left: 100%;
     }
 
     .tab:hover {
-      background: rgba(255,255,255,0.3);
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
     }
 
     .tab.active {
       background: white;
       color: #667eea;
       border-color: white;
+      box-shadow: var(--shadow-lg);
+      transform: scale(1.05);
     }
 
     .news-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
     }
 
     .news-card {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 25px;
+      padding: 25px;
       cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-md);
       position: relative;
       overflow: hidden;
+      animation: fadeInUp 0.6s ease backwards;
     }
 
-    .news-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
+
+    .news-card:nth-child(1) { animation-delay: 0.1s; }
+    .news-card:nth-child(2) { animation-delay: 0.2s; }
+    .news-card:nth-child(3) { animation-delay: 0.3s; }
+    .news-card:nth-child(4) { animation-delay: 0.4s; }
+    .news-card:nth-child(5) { animation-delay: 0.5s; }
 
     .news-card::before {
       content: '';
@@ -124,67 +284,129 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #667eea, #764ba2);
+      height: 5px;
+      background: var(--primary-gradient);
+    }
+
+    .news-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: var(--shadow-lg);
     }
 
     .rank {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      top: 20px;
+      right: 20px;
+      background: var(--primary-gradient);
       color: white;
-      width: 35px;
-      height: 35px;
+      width: 45px;
+      height: 45px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
-      font-size: 0.9rem;
+      font-weight: 800;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s;
     }
 
     .rank.top-3 {
-      background: linear-gradient(135deg, #f093fb, #f5576c);
-      font-size: 1rem;
-      width: 40px;
-      height: 40px;
+      background: var(--secondary-gradient);
+      font-size: 1.2rem;
+      width: 50px;
+      height: 50px;
+      box-shadow: 0 4px 15px rgba(240, 147, 251, 0.5);
+    }
+
+    .news-card:hover .rank {
+      transform: scale(1.1) rotate(5deg);
     }
 
     .title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 10px;
-      padding-right: 50px;
-      line-height: 1.4;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 15px;
+      padding-right: 60px;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .meta {
       display: flex;
       gap: 15px;
-      font-size: 0.85rem;
-      color: #666;
+      font-size: 0.9rem;
+      color: #718096;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
     .hot-score {
       color: #f5576c;
-      font-weight: 500;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      background: linear-gradient(135deg, rgba(245, 87, 108, 0.1), rgba(240, 147, 251, 0.1));
+      border-radius: 20px;
+    }
+
+    .source-badge {
+      padding: 6px 14px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      color: #667eea;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85rem;
     }
 
     .loading {
       text-align: center;
       color: white;
-      padding: 50px;
-      font-size: 1.2rem;
+      padding: 60px;
+      font-size: 1.3rem;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .error {
-      background: rgba(255,255,255,0.9);
-      border-radius: 15px;
-      padding: 30px;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      padding: 50px;
       text-align: center;
       color: #f5576c;
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(245, 87, 108, 0.2);
+    }
+
+    .error h3 {
+      font-size: 2rem;
+      margin-bottom: 15px;
     }
 
     /* 模态框样式 */
@@ -195,11 +417,18 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
       z-index: 1000;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     .modal.show {
@@ -208,141 +437,234 @@
 
     .modal-content {
       background: white;
-      border-radius: 20px;
-      padding: 30px;
-      max-width: 600px;
+      border-radius: 30px;
+      padding: 40px;
+      max-width: 650px;
       width: 100%;
-      max-height: 80vh;
+      max-height: 85vh;
       overflow-y: auto;
       position: relative;
-      animation: modalSlideIn 0.3s ease;
+      animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-lg);
     }
 
     @keyframes modalSlideIn {
       from {
-        transform: translateY(-50px);
+        transform: translateY(-50px) scale(0.9);
         opacity: 0;
       }
       to {
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
         opacity: 1;
       }
     }
 
     .modal-close {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      background: #f5f5f5;
+      top: 25px;
+      right: 25px;
+      background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
       border: none;
-      width: 35px;
-      height: 35px;
+      width: 45px;
+      height: 45px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 1.5rem;
       color: #666;
       transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
     }
 
     .modal-close:hover {
-      background: #e0e0e0;
+      background: linear-gradient(135deg, #e0e0e0, #d0d0d0);
       color: #333;
+      transform: rotate(90deg) scale(1.1);
     }
 
     .modal-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #333;
-      margin-bottom: 20px;
-      padding-right: 50px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #2d3748;
+      margin-bottom: 25px;
+      padding-right: 60px;
+      line-height: 1.4;
     }
 
     .modal-info {
       display: grid;
       gap: 15px;
-      margin-bottom: 20px;
-      padding: 20px;
-      background: #f8f9fa;
-      border-radius: 10px;
+      margin-bottom: 25px;
+      padding: 25px;
+      background: linear-gradient(135deg, #f7fafc, #edf2f7);
+      border-radius: 20px;
     }
 
     .modal-info-item {
       display: flex;
       justify-content: space-between;
-      padding: 10px;
+      align-items: center;
+      padding: 15px;
       background: white;
-      border-radius: 8px;
+      border-radius: 15px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s;
+    }
+
+    .modal-info-item:hover {
+      transform: translateX(5px);
+      box-shadow: var(--shadow-md);
     }
 
     .modal-label {
-      font-weight: 600;
-      color: #666;
+      font-weight: 700;
+      color: #667eea;
+      font-size: 0.95rem;
     }
 
     .modal-value {
-      color: #333;
+      color: #2d3748;
+      font-weight: 600;
     }
 
     .modal-link {
-      display: inline-block;
-      padding: 12px 25px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 35px;
+      background: var(--primary-gradient);
       color: white;
       text-decoration: none;
-      border-radius: 25px;
-      transition: all 0.3s;
-      margin-top: 10px;
+      border-radius: 50px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 700;
+      box-shadow: var(--shadow-md);
+      width: 100%;
+      justify-content: center;
     }
 
     .modal-link:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
     }
 
-    .spinner {
-      border: 3px solid rgba(255,255,255,0.3);
-      border-top: 3px solid white;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
+    /* 滚动条美化 */
+    ::-webkit-scrollbar {
+      width: 10px;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
     }
 
+    ::-webkit-scrollbar-thumb {
+      background: var(--glass-bg);
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* 响应式设计 */
     @media (max-width: 768px) {
       .header h1 {
-        font-size: 1.8rem;
+        font-size: 2rem;
       }
 
       .news-grid {
         grid-template-columns: 1fr;
       }
+
+      .tabs {
+        gap: 10px;
+      }
+
+      .tab {
+        padding: 12px 25px;
+        font-size: 0.9rem;
+      }
+
+      .modal-content {
+        padding: 30px;
+        margin: 20px;
+      }
+    }
+
+    /* 新增：标签页指示器 */
+    .tab-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 600;
+      z-index: 100;
+      animation: slideInRight 0.5s ease;
+      box-shadow: var(--shadow-md);
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- 标签页指示器 -->
+  <div class="tab-indicator" id="tabIndicator">
+    📍 当前: 百度热搜
+  </div>
+
   <div class="container">
     <div class="header">
-      <h1>📰 中国热门新闻</h1>
+      <h1>🌍 全球热点新闻</h1>
       <p id="currentTime"></p>
-      <button class="refresh-btn" onclick="loadCurrentTab()">🔄 刷新数据</button>
+      <div class="header-info">
+        <div class="header-stat">
+          <span class="header-stat-icon">📊</span>
+          <span>实时更新</span>
+        </div>
+        <div class="header-stat">
+          <span class="header-stat-icon">🌐</span>
+          <span>3个数据源</span>
+        </div>
+        <div class="header-stat">
+          <span class="header-stat-icon">⚡</span>
+          <span>快速响应</span>
+        </div>
+      </div>
+      <button class="refresh-btn" onclick="loadCurrentTab()">
+        <span class="refresh-btn-icon">🔄</span>
+        刷新数据
+      </button>
     </div>
 
     <div class="tabs">
-      <div class="tab active" data-source="baidu" onclick="switchTab('baidu')">百度热搜</div>
-      <div class="tab" data-source="zhihu" onclick="switchTab('zhihu')">知乎热榜</div>
-      <div class="tab" data-source="hacker" onclick="switchTab('hacker')">Hacker News</div>
+      <div class="tab active" data-source="baidu" onclick="switchTab('baidu')">🔥 百度热搜</div>
+      <div class="tab" data-source="zhihu" onclick="switchTab('zhihu')">💡 知乎热榜</div>
+      <div class="tab" data-source="hacker" onclick="switchTab('hacker')">💻 Hacker News</div>
     </div>
 
     <div id="newsContainer">
       <div class="loading">
         <div class="spinner"></div>
-        <p style="margin-top: 15px;">加载中...</p>
+        <p>正在加载热点数据...</p>
       </div>
     </div>
   </div>
@@ -354,25 +676,32 @@
       <h2 class="modal-title" id="modalTitle"></h2>
       <div class="modal-info">
         <div class="modal-info-item">
-          <span class="modal-label">排名</span>
+          <span class="modal-label">🏆 排名</span>
           <span class="modal-value" id="modalRank"></span>
         </div>
         <div class="modal-info-item">
-          <span class="modal-label">热度</span>
+          <span class="modal-label">🔥 热度</span>
           <span class="modal-value hot-score" id="modalHot"></span>
         </div>
         <div class="modal-info-item">
-          <span class="modal-label">数据源</span>
+          <span class="modal-label">📱 数据源</span>
           <span class="modal-value" id="modalSource"></span>
         </div>
       </div>
-      <a href="#" id="modalLink" target="_blank" class="modal-link">🔗 查看完整内容</a>
+      <a href="#" id="modalLink" target="_blank" class="modal-link">
+        🔗 查看完整内容
+      </a>
     </div>
   </div>
 
   <script>
     let currentSource = 'baidu';
     let newsData = [];
+    const sourceNames = {
+      'baidu': '百度热搜',
+      'zhihu': '知乎热榜',
+      'hacker': 'Hacker News'
+    };
 
     // 更新当前时间
     function updateTime() {
@@ -383,9 +712,15 @@
         day: 'numeric',
         weekday: 'long',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        second: '2-digit'
       };
       document.getElementById('currentTime').textContent = now.toLocaleDateString('zh-CN', options);
+    }
+
+    // 更新标签页指示器
+    function updateTabIndicator() {
+      document.getElementById('tabIndicator').textContent = `📍 当前: ${sourceNames[currentSource]}`;
     }
 
     // 切换标签
@@ -400,6 +735,7 @@
         }
       });
 
+      updateTabIndicator();
       loadCurrentTab();
     }
 
@@ -412,7 +748,7 @@
       container.innerHTML = `
         <div class="loading">
           <div class="spinner"></div>
-          <p style="margin-top: 15px;">加载中...</p>
+          <p>正在加载 ${sourceNames[currentSource]} 数据...</p>
         </div>
       `;
       refreshBtn.disabled = true;
@@ -431,7 +767,7 @@
           container.innerHTML = `
             <div class="error">
               <h3>😔 暂无数据</h3>
-              <p>${currentSource === 'zhihu' ? '知乎热榜API受限，请使用百度热搜' : '获取数据失败，请稍后重试'}</p>
+              <p>${currentSource === 'zhihu' ? '知乎热榜API受限，请使用其他数据源' : '获取数据失败，请稍后重试'}</p>
             </div>
           `;
         }
@@ -440,6 +776,7 @@
           <div class="error">
             <h3>❌ 加载失败</h3>
             <p>${error.message}</p>
+            <p style="margin-top: 15px; font-size: 0.9rem;">请检查网络连接或稍后重试</p>
           </div>
         `;
       } finally {
@@ -450,9 +787,7 @@
     // 显示新闻列表
     function displayNews(news) {
       const container = document.getElementById('newsContainer');
-      const sourceName = currentSource === 'baidu' ? '百度热搜' :
-                          currentSource === 'zhihu' ? '知乎热榜' :
-                          'Hacker News';
+      const sourceName = sourceNames[currentSource];
 
       container.innerHTML = `
         <div class="news-grid">
@@ -462,7 +797,7 @@
               <div class="title">${item.title || item.word}</div>
               <div class="meta">
                 ${item.hot ? `<span class="hot-score">🔥 ${formatHot(item.hot)}</span>` : ''}
-                <span>📱 ${sourceName}</span>
+                <span class="source-badge">📱 ${sourceName}</span>
               </div>
             </div>
           `).join('')}
@@ -489,9 +824,7 @@
       document.getElementById('modalTitle').textContent = item.title || item.word;
       document.getElementById('modalRank').textContent = `#${item.rank || index + 1}`;
       document.getElementById('modalHot').textContent = formatHot(item.hot || 'N/A');
-      document.getElementById('modalSource').textContent = currentSource === 'baidu' ? '百度热搜' :
-                                                          currentSource === 'zhihu' ? '知乎热榜' :
-                                                          'Hacker News';
+      document.getElementById('modalSource').textContent = sourceNames[currentSource];
       document.getElementById('modalLink').href = item.url || item.link || '#';
 
       modal.classList.add('show');
@@ -518,7 +851,8 @@
 
     // 页面加载时初始化
     updateTime();
-    setInterval(updateTime, 60000);
+    setInterval(updateTime, 1000);
+    updateTabIndicator();
     loadCurrentTab();
   </script>
 </body>
