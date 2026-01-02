@@ -94,6 +94,50 @@ app.get('/api/zhihu-hot', async (req, res) => {
   });
 });
 
+// API端点：获取 Hacker News
+app.get('/api/hacker-hot', async (req, res) => {
+  try {
+    // 获取热门故事ID列表
+    const response = await axios.get('https://hacker-news.firebaseio.com/v0/topstories.json', {
+      timeout: 10000
+    });
+
+    if (!response.data) {
+      res.json({ success: false, data: [] });
+      return;
+    }
+
+    // 获取前20个故事的详细信息
+    const topStoryIds = response.data.slice(0, 20);
+    const storyPromises = topStoryIds.map(id =>
+      axios.get(`https://hacker-news.firebaseio.com/v0/item/${id}.json`, {
+        timeout: 5000
+      }).catch(() => null)
+    );
+
+    const stories = await Promise.all(storyPromises);
+
+    const news = stories
+      .filter(story => story && story.data)
+      .map((story, index) => ({
+        rank: index + 1,
+        title: story.data.title || 'Unknown Title',
+        url: story.data.url || `https://news.ycombinator.com/item?id=${story.data.id}`,
+        hot: story.data.score || 0,
+        author: story.data.by || 'unknown'
+      }));
+
+    res.json({
+      success: true,
+      data: news,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('获取 Hacker News 失败:', error.message);
+    res.json({ success: false, error: error.message, data: [] });
+  }
+});
+
 // 主页
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -103,6 +147,7 @@ app.listen(PORT, () => {
   console.log(`\n🚀 新闻服务已启动!`);
   console.log(`📱 访问地址: http://localhost:${PORT}`);
   console.log(`🔗 API端点:`);
-  console.log(`   - GET /api/baidu-hot  (百度热搜)`);
-  console.log(`   - GET /api/zhihu-hot  (知乎热榜)\n`);
+  console.log(`   - GET /api/baidu-hot   (百度热搜)`);
+  console.log(`   - GET /api/zhihu-hot   (知乎热榜)`);
+  console.log(`   - GET /api/hacker-hot  (Hacker News) 🆕\n`);
 });

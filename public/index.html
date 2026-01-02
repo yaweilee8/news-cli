@@ -336,6 +336,7 @@
     <div class="tabs">
       <div class="tab active" data-source="baidu" onclick="switchTab('baidu')">百度热搜</div>
       <div class="tab" data-source="zhihu" onclick="switchTab('zhihu')">知乎热榜</div>
+      <div class="tab" data-source="hacker" onclick="switchTab('hacker')">Hacker News</div>
     </div>
 
     <div id="newsContainer">
@@ -417,7 +418,9 @@
       refreshBtn.disabled = true;
 
       try {
-        const endpoint = currentSource === 'baidu' ? '/.netlify/functions/baidu-hot' : '/.netlify/functions/zhihu-hot';
+        const endpoint = currentSource === 'baidu' ? '/.netlify/functions/baidu-hot' :
+                          currentSource === 'zhihu' ? '/.netlify/functions/zhihu-hot' :
+                          '/.netlify/functions/hacker-hot';
         const response = await fetch(endpoint);
         const result = await response.json();
 
@@ -447,7 +450,9 @@
     // 显示新闻列表
     function displayNews(news) {
       const container = document.getElementById('newsContainer');
-      const sourceName = currentSource === 'baidu' ? '百度热搜' : '知乎热榜';
+      const sourceName = currentSource === 'baidu' ? '百度热搜' :
+                          currentSource === 'zhihu' ? '知乎热榜' :
+                          'Hacker News';
 
       container.innerHTML = `
         <div class="news-grid">
@@ -484,7 +489,9 @@
       document.getElementById('modalTitle').textContent = item.title || item.word;
       document.getElementById('modalRank').textContent = `#${item.rank || index + 1}`;
       document.getElementById('modalHot').textContent = formatHot(item.hot || 'N/A');
-      document.getElementById('modalSource').textContent = currentSource === 'baidu' ? '百度热搜' : '知乎热榜';
+      document.getElementById('modalSource').textContent = currentSource === 'baidu' ? '百度热搜' :
+                                                          currentSource === 'zhihu' ? '知乎热榜' :
+                                                          'Hacker News';
       document.getElementById('modalLink').href = item.url || item.link || '#';
 
       modal.classList.add('show');

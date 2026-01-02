@@ -101,6 +101,50 @@ async function fetchZhihuHotNews() {
 }
 
 /**
+ * 获取 Hacker News 数据
+ */
+async function fetchHackerNews() {
+  try {
+    console.log(chalk.gray('正在获取 Hacker News 数据...'));
+
+    // 获取热门故事ID列表
+    const response = await axios.get('https://hacker-news.firebaseio.com/v0/topstories.json', {
+      timeout: 10000
+    });
+
+    if (!response.data) {
+      return [];
+    }
+
+    // 获取前20个故事的详细信息
+    const topStoryIds = response.data.slice(0, 20);
+    const storyPromises = topStoryIds.map(id =>
+      axios.get(`https://hacker-news.firebaseio.com/v0/item/${id}.json`, {
+        timeout: 5000
+      }).catch(() => null)
+    );
+
+    const stories = await Promise.all(storyPromises);
+
+    const news = stories
+      .filter(story => story && story.data)
+      .map((story, index) => ({
+        rank: index + 1,
+        title: story.data.title || 'Unknown Title',
+        url: story.data.url || `https://news.ycombinator.com/item?id=${story.data.id}`,
+        hot: story.data.score || 0,
+        author: story.data.by || 'unknown'
+      }));
+
+    console.log(chalk.green(`✓ Hacker News 成功获取 ${news.length} 条数据`));
+    return news;
+  } catch (error) {
+    console.error(chalk.red('获取 Hacker News 失败:'), error.message);
+    return [];
+  }
+}
+
+/**
  * 格式化输出新闻列表
  */
 function displayNews(news, source) {
@@ -138,14 +182,15 @@ function displayNews(news, source) {
  * 主函数
  */
 async function main() {
-  console.log(chalk.bold.blue('\n📰 中国热门新闻抓取工具'));
+  console.log(chalk.bold.blue('\n📰 全球热门新闻抓取工具'));
   console.log(chalk.gray(`当前日期: ${format(new Date(), 'yyyy年MM月dd日')}`));
   console.log(chalk.gray(`抓取日期: ${getYesterday()}\n`));
 
-  // 并行获取百度和知乎的热搜数据
-  const [baiduNews, zhihuNews] = await Promise.all([
+  // 并行获取多个数据源的新闻
+  const [baiduNews, zhihuNews, hackerNews] = await Promise.all([
     fetchBaiduHotNews(),
-    fetchZhihuHotNews()
+    fetchZhihuHotNews(),
+    fetchHackerNews()
   ]);
 
   // 显示百度热搜
@@ -156,6 +201,11 @@ async function main() {
   // 显示知乎热榜
   if (zhihuNews.length > 0) {
     displayNews(zhihuNews, '知乎热榜');
+  }
+
+  // 显示 Hacker News
+  if (hackerNews.length > 0) {
+    displayNews(hackerNews, 'Hacker News');
   }
 
   console.log(chalk.green.bold('✅ 数据抓取完成！'));
