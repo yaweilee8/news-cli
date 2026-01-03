@@ -623,6 +623,131 @@
         opacity: 1;
       }
     }
+
+    /* 市场行情卡片样式 */
+    .market-ticker-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 10px 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+      border-radius: 15px;
+      animation: slideDown 0.5s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ticker-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .ticker-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #667eea;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .spinner-small {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(102, 126, 234, 0.1);
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .ticker-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .ticker-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .ticker-item.positive {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.15));
+      color: #059669;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .ticker-item.negative {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .ticker-name {
+      font-weight: 700;
+      margin-right: 4px;
+      font-size: 0.85rem;
+    }
+
+    .ticker-price {
+      font-weight: 800;
+      font-size: 1.05rem;
+    }
+
+    .ticker-change {
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .ticker-item {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+      }
+      .ticker-price {
+        font-size: 0.95rem;
+      }
+      .ticker-change {
+        font-size: 0.75rem;
+      }
+      .market-ticker-bar {
+        padding: 8px 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -653,6 +778,17 @@
         <span class="refresh-btn-icon">🔄</span>
         刷新数据
       </button>
+    </div>
+
+    <!-- 市场行情卡片 -->
+    <div class="market-ticker-bar" id="marketTicker">
+      <div class="ticker-container">
+        <div class="ticker-loading" id="tickerLoading">
+          <div class="spinner-small"></div>
+          <span>加载行情数据...</span>
+        </div>
+        <div class="ticker-items" id="tickerItems" style="display: none;"></div>
+      </div>
     </div>
 
     <div class="tabs">
@@ -858,6 +994,94 @@
     setInterval(updateTime, 1000);
     updateTabIndicator();
     loadCurrentTab();
+
+    // ========== 市场行情管理器 ==========
+    const marketTickerManager = {
+      refreshInterval: 30000, // 30秒自动刷新
+      timer: null,
+
+      async init() {
+        await this.loadMarketData();
+        this.startAutoRefresh();
+      },
+
+      async loadMarketData() {
+        try {
+          const isNetlify = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+          const apiPrefix = isNetlify ? '/.netlify/functions' : '/api';
+
+          const response = await fetch(`${apiPrefix}/market`);
+          const result = await response.json();
+
+          if (result.success && result.data) {
+            this.renderTicker(result.data);
+          } else {
+            this.showError();
+          }
+        } catch (error) {
+          console.error('加载行情失败:', error);
+          this.showError();
+        }
+      },
+
+      renderTicker(data) {
+        const container = document.getElementById('tickerItems');
+        const loading = document.getElementById('tickerLoading');
+
+        // 合并所有市场数据
+        const allItems = [
+          ...(data.crypto || []),
+          ...(data.china_stocks || []),
+          ...(data.us_stocks || []),
+          ...(data.metals || [])
+        ];
+
+        if (allItems.length === 0) {
+          this.showError();
+          return;
+        }
+
+        container.innerHTML = allItems.map(item => {
+          const isPositive = item.changePercent >= 0;
+          const icon = isPositive ? '↑' : '↓';
+          const colorClass = isPositive ? 'positive' : 'negative';
+          const sign = isPositive ? '+' : '';
+          const price = this.formatPrice(item.price, item.symbol);
+
+          return `
+            <div class="ticker-item ${colorClass}">
+              <span class="ticker-name">${item.name}</span>
+              <span class="ticker-price">${price}</span>
+              <span class="ticker-change">${icon} ${sign}${item.changePercent.toFixed(2)}%</span>
+            </div>
+          `;
+        }).join('');
+
+        loading.style.display = 'none';
+        container.style.display = 'flex';
+      },
+
+      formatPrice(price, symbol) {
+        if (symbol.includes('BTC')) {
+          return `$${price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+        return price.toFixed(2);
+      },
+
+      showError() {
+        const loading = document.getElementById('tickerLoading');
+        loading.innerHTML = '<span style="color: #dc2626;">⚠️ 行情数据加载失败</span>';
+      },
+
+      startAutoRefresh() {
+        this.timer = setInterval(() => {
+          this.loadMarketData();
+        }, this.refreshInterval);
+      }
+    };
+
+    // 初始化市场行情卡片
+    marketTickerManager.init();
   </script>
 </body>
 </html>
