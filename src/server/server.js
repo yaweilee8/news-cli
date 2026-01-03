@@ -5,7 +5,7 @@ const app = express();
 const PORT = 3000;
 
 // 静态文件服务
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '../../public')));
 
 // API端点：获取百度热搜
 app.get('/api/baidu-hot', async (req, res) => {
@@ -279,7 +279,7 @@ app.get('/api/market', async (req, res) => {
 
 // 主页
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '../../public', 'index.html'));
 });
 
 app.listen(PORT, () => {

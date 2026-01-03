@@ -2,14 +2,14 @@
   "name": "news-cli",
   "version": "1.0.0",
   "description": "中国热门新闻命令行工具",
-  "main": "index.js",
+  "main": "src/cli/index.js",
   "bin": {
-    "news": "./index.js"
+    "news": "./src/cli/index.js"
   },
   "scripts": {
-    "start": "node index.js",
-    "web": "node server.js",
-    "test": "node index.js"
+    "start": "node src/cli/index.js",
+    "web": "node src/server/server.js",
+    "test": "node src/cli/index.js"
   },
   "keywords": [
     "news",
